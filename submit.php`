@@ -1,0 +1,133 @@
+<?php
+// Database configuration
+$servername = "localhost";
+$username = "root"; // Change this to your DB username
+$password = "";     // Change this to your DB password
+$dbname = "simple-forms";
+
+// Create connection
+$conn = new mysqli($servername, $username, $password, $dbname);
+
+// Check connection
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
+}
+
+// Check if form is submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Collect and sanitize input from Step 1
+    $name = $conn->real_escape_string($_POST['name']);
+    $email = $conn->real_escape_string($_POST['email']);
+    $address = $conn->real_escape_string($_POST['address']);
+    $birthday = $conn->real_escape_string($_POST['birthday']);
+    $phone = $conn->real_escape_string($_POST['phone']);
+    $sim_card = $conn->real_escape_string($_POST['sim_card']);
+
+    // Collect and sanitize input from Step 2
+    $fav_food = $conn->real_escape_string($_POST['fav_food']);
+    $fav_drink = $conn->real_escape_string($_POST['fav_drink']);
+    $hobby = $conn->real_escape_string($_POST['hobby']);
+    $fav_color = $conn->real_escape_string($_POST['fav_color']);
+
+    // Collect and sanitize input from Step 3
+    $fun_question = $conn->real_escape_string($_POST['fun_question']);
+
+    // SQL to insert data
+    $sql = "INSERT INTO submissions (name, email, address, birthday, phone, sim_card, fav_food, fav_drink, hobby, fav_color, fun_question)
+            VALUES ('$name', '$email', '$address', '$birthday', '$phone', '$sim_card', '$fav_food', '$fav_drink', '$hobby', '$fav_color', '$fun_question')";
+
+    if ($conn->query($sql) === TRUE) {
+
+        // --- EMAIL NOTIFICATION SECTION ---
+        $to = $email;
+        $subject = "Your Journey Begins, " . $name . "!";
+        $message = "Hello " . $name . ",\n\nThank you for completing your full profile!\n\n" .
+                   "We love your choices! Favorite food: " . $fav_food . ", Favorite drink: " . $fav_drink . ".\n" .
+                   "And we think your answer to the superpower question is amazing!\n\n" .
+                   "Your information has been successfully saved.\n\n" .
+                   "Keep believing in yourself!\n\n" .
+                   "Best regards,\nSimple Form Team";
+        $headers = "From: no-reply@yourdomain.com" . "\r\n" .
+                   "Reply-To: no-reply@yourdomain.com" . "\r\n" .
+                   "X-Mailer: PHP/" . phpversion();
+
+        mail($to, $subject, $message, $headers);
+        // ----------------------------------
+
+        // BEAUTIFUL SUCCESS PAGE
+        echo '<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Submission Successful</title>
+            <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+            <style>
+                body {
+                    font-family: "Inter", sans-serif;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    min-height: 100vh;
+                    margin: 0;
+                    padding: 20px;
+                }
+                .success-card {
+                    background: white;
+                    padding: 3rem;
+                    border-radius: 24px;
+                    text-align: center;
+                    box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1);
+                    max-width: 450px;
+                    animation: popUp 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+                }
+                @keyframes popUp {
+                    from { opacity: 0; transform: scale(0.8); }
+                    to { opacity: 1; transform: scale(1); }
+                }
+                .icon-circle {
+                    width: 80px;
+                    height: 80px;
+                    background: #dcfce7;
+                    color: #22c55e;
+                    border-radius: 50%;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    font-size: 40px;
+                    margin: 0 auto 1.5rem;
+                }
+                h1 { color: #1e293b; margin-bottom: 1rem; font-size: 1.75rem; }
+                p { color: #64748b; line-height: 1.6; margin-bottom: 2rem; }
+                .btn-back {
+                    background: #6366f1;
+                    color: white;
+                    padding: 0.8rem 2rem;
+                    text-decoration: none;
+                    border-radius: 12px;
+                    font-weight: 600;
+                    transition: all 0.2s;
+                }
+                .btn-back:hover {
+                    background: #4f46e5;
+                    transform: translateY(-2px);
+                }
+            </style>
+        </head>
+        <body>
+            <div class="success-card">
+                <div class="icon-circle">✓</div>
+                <h1>You Did It!</h1>
+                <p>Your full profile is now complete. We have sent a special thank you email to <b>' . $email . '</b>.</p>
+                <a href="index.html" class="btn-back">Return to Home</a>
+            </div>
+        </body>
+        </html>';
+    } else {
+        echo "Error: " . $sql . "<br>" . $conn->error;
+    }
+}
+
+$conn->close();
+?>
