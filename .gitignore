@@ -1,0 +1,13 @@
+# Secrets
+/config.php
+/config.local.php
+
+# Private user data & logs (never commit photos or personal info)
+/storage/uploads/*
+!/storage/uploads/.gitkeep
+/storage/logs/*
+!/storage/logs/.gitkeep
+/uploads/
+*.log
+mail_log.txt
+/storage/ADMIN_PASSWORD.txt
